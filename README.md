@@ -1,168 +1,90 @@
-# Quiet Chronicle
+# Kairos Journal ⏳
 
-A calm, notebook-like personal productivity and reflection app. Log what happened. Nothing more.
+> *“Teach us to number our days, that we may gain a heart of wisdom.” — Psalm 90:12*
 
-## Features
+**Kairos Journal** is a specialized time-logging application focused on intentionality and stewardship. Unlike traditional productivity tools that prioritize "output," Kairos is designed for **awareness and reflection**, helping users align their daily actions with their long-term values and spiritual calling.
 
-- **Daily Time Logging**: Log activities in 30-minute slots throughout the day
-- **Important-Urgent Matrix**: Visualize where your time goes using Ankur Warikoo's matrix
-- **Today Reflection**: See your day's patterns, energy flow, and insights
-- **Weekly Patterns**: Understand your weekly rhythms and repeating tasks
-- **Calm Interface**: Minimal, text-first design that feels like a notebook
+---
 
-## Tech Stack
+## 🎯 Project Vision
 
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript (strict mode)
-- **Styling**: TailwindCSS 4
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
-- **Deployment**: Vercel
+The core objective of this project was to explore the intersection of **time management and mindfulness**. By distinguishing between *Chronos* (quantitative clock time) and *Kairos* (qualitative, purposeful time), the app provides a framework for users to observe their patterns without the pressure of typical "optimization" metrics.
 
-## Getting Started
+---
 
-### Prerequisites
+## 🧠 Functional Overview
 
-- Node.js 18+ 
-- npm/yarn/pnpm
-- Supabase account and project
+### 1. The Temporal Ledger
 
-### Installation
+A simplified logging system utilizing 30-minute intervals. This encourages consistent check-ins without the friction of minute-by-minute tracking.
 
-1. Clone the repository:
-```bash
-git clone <your-repo-url>
-cd quiet-chronicle
-```
+### 2. Time Categorization (Warikoo Matrix)
 
-2. Install dependencies:
-```bash
-npm install
-```
+Built-in classification based on the Eisenhower/Warikoo framework:
 
-3. Set up environment variables:
-```bash
-cp .env.example .env.local
-```
+* **High Impact vs. Low Impact**
+* **Urgent vs. Non-Urgent**
+* *Outcome:* Visualizes the "drift" between busy-work and meaningful progress.
 
-Edit `.env.local` and add your Supabase credentials:
-```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+### 3. Energy Resource Mapping
 
-4. Set up your Supabase database:
+Instead of tracking "success," users track energy expenditure across four dimensions:
 
-Create the following tables:
+* **Mental, Physical, Emotional, and Spiritual.**
+* This provides a holistic view of burnout risks and recovery patterns.
 
-**daily_logs**
-```sql
-CREATE TABLE daily_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  date DATE NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id, date)
-);
-```
+---
 
-**time_entries**
-```sql
-CREATE TABLE time_entries (
-  daily_log_id UUID REFERENCES daily_logs(id) ON DELETE CASCADE,
-  time_slot TEXT NOT NULL,
-  tasks JSONB DEFAULT '[]',
-  important BOOLEAN DEFAULT false,
-  urgent BOOLEAN DEFAULT false,
-  place TEXT,
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  PRIMARY KEY (daily_log_id, time_slot)
-);
-```
+## 🛠 Technical Architecture
 
-Enable Row Level Security (RLS) and create policies:
+The application is built with a modern, scalable stack, emphasizing an **offline-first experience** and secure data synchronization.
 
-```sql
-ALTER TABLE daily_logs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE time_entries ENABLE ROW LEVEL SECURITY;
+* **Frontend:** Next.js 15 (App Router), TypeScript, Tailwind CSS.
+* **Backend-as-a-Service:** Supabase (PostgreSQL, Row Level Security).
+* **Authentication:** Passwordless Magic-Link via Supabase Auth.
+* **State & Sync:** Optimistic UI updates for seamless local-to-cloud transitions.
+* **Deployment:** Vercel.
 
-CREATE POLICY "Users can view own logs"
-  ON daily_logs FOR SELECT
-  USING (auth.uid() = user_id);
+---
 
-CREATE POLICY "Users can insert own logs"
-  ON daily_logs FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+## 📂 System Structure
 
-CREATE POLICY "Users can update own logs"
-  ON daily_logs FOR UPDATE
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can view own entries"
-  ON time_entries FOR SELECT
-  USING (auth.uid() = (SELECT user_id FROM daily_logs WHERE id = daily_log_id));
-
-CREATE POLICY "Users can insert own entries"
-  ON time_entries FOR INSERT
-  WITH CHECK (auth.uid() = (SELECT user_id FROM daily_logs WHERE id = daily_log_id));
-
-CREATE POLICY "Users can update own entries"
-  ON time_entries FOR UPDATE
-  USING (auth.uid() = (SELECT user_id FROM daily_logs WHERE id = daily_log_id));
-```
-
-5. Run the development server:
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Deployment
-
-### Deploy to Vercel
-
-1. Push your code to GitHub/GitLab/Bitbucket
-
-2. Import your project in [Vercel](https://vercel.com)
-
-3. Add environment variables in Vercel dashboard:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-
-4. Deploy!
-
-Vercel will automatically detect Next.js and configure the build settings.
-
-### Environment Variables
-
-Make sure to set these in your Vercel project settings:
-- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous key
-
-## Project Structure
-
-```
+```text
 src/
-├── app/                    # Next.js App Router pages
-│   ├── page.tsx           # Daily log (home)
-│   ├── analytics/         # Analytics pages
-│   ├── auth/              # Auth callback
-│   └── login/             # Login page
-├── components/            # React components
-│   ├── layout/           # Layout components (BottomNav)
-│   ├── log/              # Logging components
-│   ├── analytics/        # Analytics components
-│   └── ui/               # UI components
-├── hooks/                # Custom React hooks
-├── lib/                  # Utilities and helpers
-│   ├── supabase/         # Supabase client setup
-│   ├── matrix.ts         # Matrix calculations
-│   └── energy.ts         # Energy calculations
-└── types.ts              # TypeScript types
+├── app/                  # Routing & Server Components
+│   ├── analytics/        # Logic for pattern recognition
+│   └── auth/             # Secure authentication flow
+├── components/           # Modular UI Architecture
+│   ├── log/              # Time-entry logic & state management
+│   ├── analytics/        # Data visualization components
+│   └── ui/               # Design system primitives
+├── lib/                  # Core Business Logic
+│   ├── matrix.ts         # Priority calculation algorithms
+│   └── energy.ts         # Energy distribution logic
+└── types/                # Strict Type definitions for data integrity
+
 ```
 
-## License
+---
 
-Private project
+## 🚀 Development Methodology
+
+This project was developed using a **Human-in-the-Loop AI workflow**.
+
+* **Role:** I acted as the Product Architect and Lead Engineer, defining the system requirements, UI/UX philosophy, and database schema.
+* **Execution:** Leveraging AI tools (Cursor/LLMs) for code generation, I focused on high-level logic, debugging, and ensuring architectural consistency across the Next.js App Router and Supabase integration.
+
+---
+
+## 📜 Ethical Disclaimer
+
+Kairos Journal is intentionally designed to be **non-addictive**. It lacks "gamification" features like streaks or badges to ensure the user’s relationship with the tool remains healthy, quiet, and reflective.
+
+---
+
+## 🛠 Setup & Installation
+
+1. **Clone & Install:** `npm install`
+2. **Configuration:** Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to your `.env.local`.
+3. **Launch:** `npm run dev`
+

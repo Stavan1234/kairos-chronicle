@@ -1,26 +1,62 @@
 @import "tailwindcss";
 
+@theme {
+  /* Enhanced color palette with better contrast */
+  --color-background: #0F0F0F;
+  --color-foreground: #F5F3F0;
+  
+  --color-muted: #1A1A1A;
+  --color-muted-foreground: #B0B0B0;
+  
+  --color-border: rgba(255, 255, 255, 0.08);
+  
+  /* Subtle accent colors */
+  --color-accent-teal: #5EEAD4;
+  --color-accent-blue: #7DD3FC;
+}
+
+/* Apply the variables to the document */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  /* Refined system font stack */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-feature-settings: "kern" 1, "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Hide scrollbar for the notebook feel */
+::-webkit-scrollbar {
+  display: none;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh; 
+  background-color: var(--color-background);
+  /* Subtle gradient overlay for depth */
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(94, 234, 212, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(125, 211, 252, 0.02) 0%, transparent 50%);
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Better focus states for accessibility */
+:focus-visible {
+  outline: 2px solid rgba(94, 234, 212, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Mobile touch improvements */
+@media (hover: none) and (pointer: coarse) {
+  button, a {
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+  }
 }

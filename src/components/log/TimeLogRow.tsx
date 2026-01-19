@@ -21,18 +21,33 @@ export default function TimeLogRow({ timeLabel, entry, onUpdate }: TimeLogRowPro
   const tasks = entry?.tasks || [];
   const isImportant = entry?.important || false;
   const isUrgent = entry?.urgent || false;
-  const place = entry?.place; // Can be undefined, empty string, or a place name
+  const place = entry?.place; 
+
+  // [FIX] Helper to centralize the "No Task = No Flags" logic
+  const updateTasks = (newTasks: Task[]) => {
+    const updates: Partial<LogEntry> = { tasks: newTasks };
+    
+    // If the list becomes empty, force flags off
+    if (newTasks.length === 0) {
+      updates.important = false;
+      updates.urgent = false;
+    }
+    
+    onUpdate(updates);
+  };
 
   const handleAddTask = () => {
     if (inputValue.trim()) {
       const newTask: Task = { id: crypto.randomUUID(), label: inputValue.trim() };
-      onUpdate({ tasks: [...tasks, newTask] }); // Send to parent
+      // Adding a task doesn't risk emptying the list, so standard update is fine
+      onUpdate({ tasks: [...tasks, newTask] }); 
       setInputValue("");
     }
   };
 
   const handleRemoveTask = (taskId: string) => {
-    onUpdate({ tasks: tasks.filter(t => t.id !== taskId) });
+    // [FIX] Use the safe updater
+    updateTasks(tasks.filter(t => t.id !== taskId));
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -41,7 +56,8 @@ export default function TimeLogRow({ timeLabel, entry, onUpdate }: TimeLogRowPro
       // Remove last task
       const newTasks = [...tasks];
       newTasks.pop();
-      onUpdate({ tasks: newTasks });
+      // [FIX] Use the safe updater
+      updateTasks(newTasks);
     }
   };
 
